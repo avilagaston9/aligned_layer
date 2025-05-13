@@ -13,6 +13,7 @@ use retry::batcher_retryables::{
 };
 use retry::{retry_function, RetryError};
 use tokio::time::{timeout, Instant};
+use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
 use types::batch_state::BatchState;
 use types::user_state::UserState;
 
@@ -388,7 +389,11 @@ impl Batcher {
         info!("Incoming TCP connection from: {}", addr);
         self.metrics.open_connections.inc();
 
-        let ws_stream_future = tokio_tungstenite::accept_async(raw_stream);
+        let mut stream_config = WebSocketConfig::default();
+        stream_config.max_frame_size = None;
+
+        let ws_stream_future =
+            tokio_tungstenite::accept_async_with_config(raw_stream, Some(stream_config));
         let ws_stream =
             match timeout(Duration::from_secs(CONNECTION_TIMEOUT), ws_stream_future).await {
                 Ok(Ok(stream)) => stream,
