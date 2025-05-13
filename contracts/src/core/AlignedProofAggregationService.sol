@@ -67,32 +67,40 @@ contract AlignedProofAggregationService is
         sp1AggregatorProgramVKHash = _sp1AggregatorProgramVKHash;
     }
 
-    function verifySP1(bytes32 blobVersionedHash, bytes calldata sp1PublicValues, bytes calldata sp1ProofBytes)
-        public
-        onlyAlignedAggregator
-    {
-        (bytes32 merkleRoot) = abi.decode(sp1PublicValues, (bytes32));
+    function verifySP1(
+        bytes32 blobVersionedHash,
+        bytes calldata sp1PublicValues,
+        bytes calldata sp1ProofBytes
+    ) public onlyAlignedAggregator {
+        bytes32 merkleRoot = abi.decode(sp1PublicValues, (bytes32));
 
         // In dev mode, poofs are mocked, so we skip the verification part
         if (_isSP1VerificationEnabled()) {
-            ISP1Verifier(sp1VerifierAddress).verifyProof(sp1AggregatorProgramVKHash, sp1PublicValues, sp1ProofBytes);
+            ISP1Verifier(sp1VerifierAddress).verifyProof(
+                sp1AggregatorProgramVKHash,
+                sp1PublicValues,
+                sp1ProofBytes
+            );
         }
 
         aggregatedProofs[merkleRoot] = true;
         emit AggregatedProofVerified(merkleRoot, blobVersionedHash);
     }
 
-    function verifyRisc0(bytes32 blobVersionedHash, bytes calldata risc0ReceiptSeal, bytes calldata risc0JournalBytes)
-        public
-        onlyAlignedAggregator
-    {
-        (bytes32 merkleRoot) = abi.decode(risc0JournalBytes, (bytes32));
+    function verifyRisc0(
+        bytes32 blobVersionedHash,
+        bytes calldata risc0ReceiptSeal,
+        bytes calldata risc0JournalBytes
+    ) public onlyAlignedAggregator {
+        bytes32 merkleRoot = abi.decode(risc0JournalBytes, (bytes32));
 
         // In dev mode, poofs are mocked, so we skip the verification part
         if (_isRisc0VerificationEnabled()) {
             bytes32 risc0JournalDigest = sha256(risc0JournalBytes);
             IRiscZeroVerifier(risc0VerifierAddress).verify(
-                risc0ReceiptSeal, risc0AggregatorProgramImageId, risc0JournalDigest
+                risc0ReceiptSeal,
+                risc0AggregatorProgramImageId,
+                risc0JournalDigest
             );
         }
 
@@ -115,13 +123,18 @@ contract AlignedProofAggregationService is
     /// @param publicInputs The public inputs bytes of the proof.
     ///
     /// @return bool Returns true if the computed Merkle root is a recognized valid aggregated proof.
-    function verifyProofInclusion(bytes32[] calldata merklePath, bytes32 programId, bytes calldata publicInputs)
-        public
-        view
-        returns (bool)
-    {
-        bytes32 proofCommitment = keccak256(abi.encodePacked(programId, publicInputs));
-        bytes32 merkleRoot = MerkleProof.processProofCalldata(merklePath, proofCommitment);
+    function verifyProofInclusion(
+        bytes32[] calldata merklePath,
+        bytes32 programId,
+        bytes calldata publicInputs
+    ) public view returns (bool) {
+        bytes32 proofCommitment = keccak256(
+            abi.encodePacked(programId, publicInputs)
+        );
+        bytes32 merkleRoot = MerkleProof.processProofCalldata(
+            merklePath,
+            proofCommitment
+        );
         return aggregatedProofs[merkleRoot];
     }
 
@@ -133,7 +146,9 @@ contract AlignedProofAggregationService is
         return risc0VerifierAddress != VERIFIER_MOCK_ADDRESS;
     }
 
-    function _authorizeUpgrade(address newImplementation)
+    function _authorizeUpgrade(
+        address newImplementation
+    )
         internal
         override
         onlyOwner // solhint-disable-next-line no-empty-blocks
@@ -148,28 +163,38 @@ contract AlignedProofAggregationService is
 
     /// @notice Sets the address of the Risc0 verifier contract
     /// @param _risc0VerifierAddress The new address for the Risc0 verifier contract
-    function setRisc0VerifierAddress(address _risc0VerifierAddress) external onlyOwner {
+    function setRisc0VerifierAddress(
+        address _risc0VerifierAddress
+    ) external onlyOwner {
         risc0VerifierAddress = _risc0VerifierAddress;
         emit Risc0VerifierAddressUpdated(_risc0VerifierAddress);
     }
 
     /// @notice Sets the image id of the Risc0 program
     /// @param _risc0AggregatorProgramImageId The new imageid for the Risc0 aggregator program
-    function setRisc0AggregatorProgramImageId(bytes32 _risc0AggregatorProgramImageId) external onlyOwner {
+    function setRisc0AggregatorProgramImageId(
+        bytes32 _risc0AggregatorProgramImageId
+    ) external onlyOwner {
         risc0AggregatorProgramImageId = _risc0AggregatorProgramImageId;
-        emit Risc0AggregatorProgramImageIdUpdated(_risc0AggregatorProgramImageId);
+        emit Risc0AggregatorProgramImageIdUpdated(
+            _risc0AggregatorProgramImageId
+        );
     }
 
     /// @notice Sets the address of the SP1 verifier contract
     /// @param _sp1VerifierAddress The new address for the SP1 verifier contract
-    function setSP1VerifierAddress(address _sp1VerifierAddress) external onlyOwner {
+    function setSP1VerifierAddress(
+        address _sp1VerifierAddress
+    ) external onlyOwner {
         sp1VerifierAddress = _sp1VerifierAddress;
         emit SP1VerifierAddressUpdated(_sp1VerifierAddress);
     }
 
     /// @notice Sets the vk hash of the sp1 program
     /// @param _sp1AggregatorProgramVKHash The new vk hash for the sp1 aggregator program
-    function setSP1AggregatorProgramVKHash(bytes32 _sp1AggregatorProgramVKHash) external onlyOwner {
+    function setSP1AggregatorProgramVKHash(
+        bytes32 _sp1AggregatorProgramVKHash
+    ) external onlyOwner {
         sp1AggregatorProgramVKHash = _sp1AggregatorProgramVKHash;
         emit SP1AggregatorProgramVKHashUpdated(_sp1AggregatorProgramVKHash);
     }
