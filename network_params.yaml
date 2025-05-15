@@ -88,8 +88,7 @@ network_params:
   }'
 
   # Preloaded contracts for the chain
-  additional_preloaded_contracts:
-  {
+  additional_preloaded_contracts: {
   "0x0165878a594ca255338adfa4d48449f69242eb8f": {
     "nonce": 1,
     "balance": "0x0",
